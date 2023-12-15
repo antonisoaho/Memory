@@ -8,13 +8,11 @@ const cardValues: number[] = Array.from(cardsArray, (card) =>
 );
 
 const successCards: String[] = [];
+let allowFlip = true;
 
 for (let i = cardValues.length - 1; i > 0; i--) {
   const newPosition = Math.ceil(Math.random() * i);
-  [cardValues[i], cardValues[newPosition]] = [
-    cardValues[newPosition],
-    cardValues[i],
-  ];
+  [cardValues[i], cardValues[newPosition]] = [cardValues[newPosition], cardValues[i]];
 }
 
 cardsArray.forEach((card, index) => {
@@ -36,13 +34,13 @@ const valueChecker = (numOne: string, numTwo: string): boolean => {
 
 const turnBackAround = () => {
   pickedCard.forEach((cardNum) => {
-    let card: HTMLElement = document.querySelector(
-      `[data-card="${cardNum}"].flip`
-    );
+    let card: HTMLElement = document.querySelector(`[data-card="${cardNum}"].flip`);
     if (card) {
       card.classList.toggle('flip');
     }
   });
+  pickedCard = [];
+  allowFlip = true;
 };
 
 const showWinningScreen = (): void => {
@@ -58,21 +56,22 @@ const showWinningScreen = (): void => {
 };
 
 const cardHandler = (card: HTMLElement): void => {
-  if (!card.classList.contains('flip')) {
+  if (!card.classList.contains('flip') && allowFlip) {
     pickedCard.push(card.dataset.card);
 
     card.classList.toggle('flip');
     if (pickedCard.length > 1) {
+      allowFlip = false;
       if (valueChecker(pickedCard[0], pickedCard[1])) {
         successCards.push(pickedCard[0]);
-
+        allowFlip = true;
+        pickedCard = [];
         if (successCards.length === cardsArray.length / 2) {
           showWinningScreen();
         }
       } else {
         setTimeout(turnBackAround, 1000);
       }
-      pickedCard = [];
     }
   }
 };

@@ -2,14 +2,10 @@ const cards = document.querySelectorAll('.memory-card');
 const cardsArray = Array.from(cards);
 const cardValues = Array.from(cardsArray, (card) => parseInt(card.dataset.card || '0', 10));
 const successCards = [];
-for (let shuffleCount = 0; shuffleCount < 3; shuffleCount++) {
-    for (let i = cardValues.length - 1; i > 0; i--) {
-        const newPosition = Math.ceil(Math.random() * i);
-        [cardValues[i], cardValues[newPosition]] = [
-            cardValues[newPosition],
-            cardValues[i],
-        ];
-    }
+let allowFlip = true;
+for (let i = cardValues.length - 1; i > 0; i--) {
+    const newPosition = Math.ceil(Math.random() * i);
+    [cardValues[i], cardValues[newPosition]] = [cardValues[newPosition], cardValues[i]];
 }
 cardsArray.forEach((card, index) => {
     card.dataset.card = String(cardValues[index]);
@@ -32,6 +28,7 @@ const turnBackAround = () => {
         }
     });
     pickedCard = [];
+    allowFlip = true;
 };
 const showWinningScreen = () => {
     const winningOverlay = document.querySelector('.overlay');
@@ -44,12 +41,14 @@ const showWinningScreen = () => {
     });
 };
 const cardHandler = (card) => {
-    if (!card.classList.contains('flip')) {
+    if (!card.classList.contains('flip') && allowFlip) {
         pickedCard.push(card.dataset.card);
         card.classList.toggle('flip');
         if (pickedCard.length > 1) {
+            allowFlip = false;
             if (valueChecker(pickedCard[0], pickedCard[1])) {
                 successCards.push(pickedCard[0]);
+                allowFlip = true;
                 pickedCard = [];
                 if (successCards.length === cardsArray.length / 2) {
                     showWinningScreen();
